@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rebate Setup Form — MH Markets</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #F0F2F5; min-height: 100vh;
+  padding: 20px 14px 60px; color: #1a1a2e;
+}
+.container { max-width: 740px; margin: 0 auto; }
+.header {
+  background: #1B2A4A; border-radius: 14px 14px 0 0;
+  padding: 24px 24px 18px; color: white;
+}
+.header-logo { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: #7EB8D4; margin-bottom: 6px; }
+.header h1 { font-size: 20px; font-weight: 700; }
+.header p { font-size: 12px; color: #9DB5C8; margin-top: 4px; }
+.card {
+  background: white; padding: 20px 24px;
+  border-left: 1px solid #E8ECF0; border-right: 1px solid #E8ECF0;
+  border-top: 1px solid #F0F2F5;
+}
+.card-last { border-radius: 0 0 14px 14px; border-bottom: 1px solid #E8ECF0; }
+.section-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: #7EB8D4; margin-bottom: 14px;
+}
+.client-block, .account-block {
+  border: 1.5px solid #E5E7EB; border-radius: 10px;
+  margin-bottom: 12px; overflow: hidden;
+}
+.block-header {
+  background: #F8FAFC; padding: 10px 14px;
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid #E5E7EB;
+}
+.block-title { font-size: 12px; font-weight: 700; color: #1B2A4A; }
+.block-body { padding: 14px; }
+.field { margin-bottom: 10px; }
+.field label { display: block; font-size: 11px; font-weight: 600; color: #6B7280; margin-bottom: 4px; }
+.field input, .field select {
+  width: 100%; padding: 9px 11px;
+  border: 1.5px solid #E5E7EB; border-radius: 7px;
+  font-size: 13px; color: #1a1a2e; background: #FAFAFA;
+  -webkit-appearance: none; transition: border-color 0.15s;
+}
+.field input:focus, .field select:focus { outline: none; border-color: #1B2A4A; background: white; }
+.field-hint { font-size: 11px; color: #9CA3AF; margin-top: 4px; }
+.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.btn-remove {
+  background: #FEE2E2; color: #B91C1C; border: none; border-radius: 6px;
+  padding: 4px 10px; font-size: 11px; font-weight: 600; cursor: pointer;
+}
+.btn-remove:hover { background: #FECACA; }
+.multi-client-warn {
+  display: none; background: #FFFBEB; border: 1.5px solid #FCD34D;
+  border-radius: 8px; padding: 10px 14px;
+  font-size: 12px; color: #92400E; margin-bottom: 14px; line-height: 1.6;
+}
+.multi-client-warn.show { display: block; }
+.notice {
+  background: #FFF7ED; border: 1px solid #FED7AA; border-radius: 7px;
+  padding: 10px 12px; font-size: 11.5px; color: #92400E; margin-bottom: 14px; line-height: 1.6;
+}
+.rebate-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 8px; }
+.rebate-table thead tr { background: #1B2A4A; color: white; }
+.rebate-table thead th { padding: 8px 4px; text-align: center; font-size: 11px; font-weight: 600; }
+.rebate-table thead th:first-child { text-align: left; padding-left: 10px; width: 52px; }
+.rebate-table tbody tr:nth-child(even) { background: #F8FAFC; }
+.rebate-table tbody td { padding: 5px 3px; text-align: center; vertical-align: middle; }
+.rebate-table tbody td:first-child { text-align: left; padding-left: 10px; font-size: 11px; font-weight: 700; color: #374151; white-space: nowrap; }
+.rebate-table input[type="number"] {
+  width: 50px; padding: 5px 3px; border: 1.5px solid #E5E7EB; border-radius: 5px;
+  font-size: 12px; text-align: center; background: #FAFAFA; color: #1a1a2e;
+  -webkit-appearance: none; -moz-appearance: textfield; transition: border-color 0.15s;
+}
+.rebate-table input[type="number"]::-webkit-inner-spin-button,
+.rebate-table input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+.rebate-table input[type="number"]:focus { outline: none; border-color: #1B2A4A; background: white; }
+.rebate-table input.err { border-color: #EF4444 !important; background: #FEF2F2 !important; }
+.rebate-table input.ok  { border-color: #10B981 !important; background: #F0FDF4 !important; }
+.tier-row { display: none; }
+.tier-row.visible { display: table-row; }
+.btn-add-tier {
+  background: #EFF6FF; color: #1D4ED8; border: 1.5px dashed #93C5FD;
+  border-radius: 7px; padding: 6px 14px; font-size: 12px; font-weight: 600;
+  cursor: pointer; margin-bottom: 4px; display: block; transition: all 0.15s;
+}
+.btn-add-tier:hover { background: #DBEAFE; }
+.btn-add { width: 100%; padding: 11px; border: 2px dashed #CBD5E1; border-radius: 9px;
+  background: transparent; color: #64748B; font-size: 13px; font-weight: 600;
+  cursor: pointer; margin-bottom: 8px; transition: all 0.15s; }
+.btn-add:hover { border-color: #1B2A4A; color: #1B2A4A; background: #F8FAFC; }
+.val-banner { display: none; padding: 10px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; margin-bottom: 14px; line-height: 1.7; }
+.val-banner.fail { display: block; background: #FEF2F2; color: #B91C1C; border: 1px solid #FECACA; }
+.val-banner.pass { display: block; background: #F0FDF4; color: #065F46; border: 1px solid #A7F3D0; }
+.output-box {
+  display: none; background: #1E293B; border-radius: 10px; padding: 16px;
+  font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.9;
+  color: #E2E8F0; white-space: pre; overflow-x: auto; margin-top: 14px; user-select: all;
+}
+.btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn { flex: 1; min-width: 110px; padding: 12px 18px; border: none; border-radius: 9px; font-size: 13px; font-weight: 700; cursor: pointer; transition: opacity 0.15s, transform 0.1s; }
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: #1B2A4A; color: white; }
+.btn-secondary { background: #E5E7EB; color: #374151; }
+.btn-copy { background: #10B981; color: white; display: none; }
+.btn:hover { opacity: 0.85; }
+@media (max-width: 500px) {
+  .card { padding: 14px 12px; }
+  .row3 { grid-template-columns: 1fr 1fr; }
+  .rebate-table input[type="number"] { width: 38px; font-size: 11px; }
+  .rebate-table thead th, .rebate-table tbody td { padding: 5px 2px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+  <div class="header-logo">MH Markets · Internal</div>
+  <h1>Rebate Setup Form</h1>
+  <p>Rebate Setup Request — Sales Use Only</p>
+</div>
+
+<div class="card">
+  <div class="section-label">Client Info</div>
+  <div id="multiClientWarn" class="multi-client-warn">
+    ⚠️ <strong>Note:</strong> The account and rebate settings below will apply to <strong>all clients listed</strong>.<br>
+    If different clients require different settings, please <strong>submit separate forms</strong>.
+  </div>
+  <div id="clientsContainer"></div>
+  <button class="btn-add" id="btnAddClient">＋ Add Client</button>
+</div>
+
+<div class="card">
+  <div class="section-label">Account & Rebate Setup</div>
+  <div class="notice">
+    <strong>⚠️ Rules:</strong><br>
+    1. A lower tier cannot exceed the tier above it (per product)<br>
+    2. If a tier is filled in any product → all 5 products must be filled for that tier<br>
+    3. Empty tier = not applicable, will be excluded from output
+  </div>
+  <div id="accountsContainer"></div>
+  <button class="btn-add" id="btnAddAccount">＋ Add Group</button>
+</div>
+
+<div class="card card-last">
+  <div class="section-label">Generate</div>
+  <div class="val-banner" id="valBanner"></div>
+  <div class="btn-row">
+    <button class="btn btn-primary" id="btnGenerate">✓ Check & Generate</button>
+    <button class="btn btn-secondary" id="btnReset">Reset</button>
+    <button class="btn btn-copy" id="copyBtn">Copy</button>
+  </div>
+  <div class="output-box" id="output"></div>
+</div>
+
+</div>
+<script>
+(function() {
+  const ALL_TIERS    = ['MIB','SIB1','SIB2','SIB3','SIB4','SIB5'];
+  const GROUPS       = ['Forex','Metal','CFD','CFD Dow','Stock'];
+  const DEFAULT_SHOW = 6; // show all by default
+  let clientCount  = 0;
+  let accountCount = 0;
+  // store visible tier count per account
+  const tierVis = {};
+
+  // ── Helpers ────────────────────────────────────
+  function qs(sel) { return document.querySelector(sel); }
+  function el(id)  { return document.getElementById(id); }
+
+  // ── Client ─────────────────────────────────────
+  function addClient() {
+    clientCount++;
+    const id  = clientCount;
+    const div = document.createElement('div');
+    div.className = 'client-block';
+    div.id = 'client-' + id;
+    div.innerHTML =
+      '<div class="block-header">' +
+        '<div class="block-title">Client #' + id + '</div>' +
+        (id > 1 ? '<button class="btn-remove" data-remove-client="' + id + '">✕ Remove</button>' : '') +
+      '</div>' +
+      '<div class="block-body">' +
+        '<div class="field">' +
+          '<label>Client Info *</label>' +
+          '<input type="text" id="cinfo-' + id + '" placeholder="Email / UUID">' +
+          '<div class="field-hint">Please provide client email first, or UUID if unavailable</div>' +
+        '</div>' +
+      '</div>';
+    el('clientsContainer').appendChild(div);
+    if (id > 1) {
+      div.querySelector('[data-remove-client]').addEventListener('click', function() {
+        div.parentNode.removeChild(div);
+        updateMultiWarn();
+      });
+    }
+    updateMultiWarn();
+  }
+
+  function updateMultiWarn() {
+    const count = document.querySelectorAll('.client-block').length;
+    el('multiClientWarn').classList.toggle('show', count >= 2);
+  }
+
+  // ── Account ────────────────────────────────────
+  function addAccount() {
+    accountCount++;
+    const id = accountCount;
+    tierVis[id] = DEFAULT_SHOW;
+
+    const qtyOpts = ['<option value="0">— None —</option>'];
+    for (var i = 1; i <= 10; i++) qtyOpts.push('<option value="' + i + '">x' + i + '</option>');
+
+    const div = document.createElement('div');
+    div.className = 'account-block';
+    div.id = 'acc-' + id;
+    div.innerHTML =
+      '<div class="block-header">' +
+        '<div class="block-title">Account #' + id + '</div>' +
+        '<button class="btn-remove" data-remove-acc="acc-' + id + '">✕ Remove</button>' +
+      '</div>' +
+      '<div class="block-body">' +
+        '<div class="row3" style="margin-bottom:12px;">' +
+          '<div class="field">' +
+            '<label>Platform *</label>' +
+            '<select id="accPlat-' + id + '">' +
+              '<option value="">— Select —</option>' +
+              '<option value="MT4">MT4</option>' +
+              '<option value="MT5">MT5</option>' +
+              '<option value="MT4 + MT5">MT4 + MT5</option>' +
+            '</select>' +
+          '</div>' +
+          '<div class="field">' +
+            '<label>Account Type *</label>' +
+            '<input type="text" id="accType-' + id + '" placeholder="">' +
+          '</div>' +
+          '<div class="field">' +
+            '<label>New Account</label>' +
+            '<select id="accQty-' + id + '">' + qtyOpts.join('') + '</select>' +
+          '</div>' +
+        '</div>' +
+        '<div class="field" style="margin-bottom:12px;">' +
+          '<label>Set Rebate</label>' +
+          '<select id="accRebate-' + id + '">' +
+            '<option value="full">Full Rebate</option>' +
+            '<option value="custom">Custom</option>' +
+            '<option value="no">No</option>' +
+          '</select>' +
+        '</div>' +
+        '<div id="rebateWrap-' + id + '">' +
+          '<table class="rebate-table" id="rebateTbl-' + id + '">' +
+            buildTableHTML(id) +
+          '</table>' +
+          '<button class="btn-add-tier" id="addTierBtn-' + id + '">＋ Add Tier</button>' +
+        '</div>' +
+      '</div>';
+
+    el('accountsContainer').appendChild(div);
+
+    // bind remove
+    div.querySelector('[data-remove-acc]').addEventListener('click', function() {
+      div.parentNode.removeChild(div);
+    });
+
+    // bind rebate select
+    el('accRebate-' + id).addEventListener('change', function() {
+      updateRebateWrap(id);
+    });
+    updateRebateWrap(id);
+
+    // bind add tier button
+    el('addTierBtn-' + id).addEventListener('click', function() {
+      if (tierVis[id] < ALL_TIERS.length) {
+        tierVis[id]++;
+        showTiers(id);
+      }
+    });
+  }
+
+  function buildTableHTML(accId) {
+    var thead = '<thead><tr><th>Tier</th>' +
+      GROUPS.map(function(g) {
+        return '<th>' + g + '<br><span style="font-size:9px;font-weight:400;color:#9DB5C8">($)</span></th>';
+      }).join('') + '</tr></thead>';
+
+    var tbody = '<tbody>' + ALL_TIERS.map(function(t, ti) {
+      return '<tr class="tier-row" id="tier-' + accId + '-' + ti + '">' +
+        '<td>' + t + '</td>' +
+        GROUPS.map(function(g) {
+          var gid = g.replace(/\s/g, '_');
+          return '<td><input type="number" min="0" step="0.01" placeholder="–" ' +
+            'data-acc="' + accId + '" data-group="' + gid + '" data-tier="' + ti + '"></td>';
+        }).join('') +
+      '</tr>';
+    }).join('') + '</tbody>';
+
+    return thead + tbody;
+  }
+
+  function showTiers(accId) {
+    var count = tierVis[accId];
+    ALL_TIERS.forEach(function(_, ti) {
+      var row = el('tier-' + accId + '-' + ti);
+      if (row) row.classList.toggle('visible', ti < count);
+    });
+    var btn = el('addTierBtn-' + accId);
+    if (btn) {
+      btn.style.display = count >= ALL_TIERS.length ? 'none' : 'block';
+    }
+  }
+
+  function updateRebateWrap(accId) {
+    var val  = el('accRebate-' + accId).value;
+    var wrap = el('rebateWrap-' + accId);
+    if (val === 'custom') {
+      wrap.style.display = '';
+      showTiers(accId);
+    } else {
+      wrap.style.display = 'none';
+    }
+  }
+
+  // ── Rebate input validation ────────────────────
+  document.getElementById('accountsContainer').addEventListener('input', function(e) {
+    if (e.target.dataset.acc) onRebateInput(e.target);
+  });
+
+  function onRebateInput(inp) {
+    inp.classList.remove('err', 'ok');
+    if (inp.value === '') return;
+    var acc  = inp.dataset.acc;
+    var gid  = inp.dataset.group;
+    var tier = parseInt(inp.dataset.tier);
+    var val  = parseFloat(inp.value);
+    if (isNaN(val) || val < 0) { inp.classList.add('err'); return; }
+    if (tier > 0) {
+      var prev = qs('input[data-acc="' + acc + '"][data-group="' + gid + '"][data-tier="' + (tier-1) + '"]');
+      if (prev && prev.value !== '' && parseFloat(prev.value) < val) {
+        inp.classList.add('err'); return;
+      }
+    }
+    inp.classList.add('ok');
+    var next = qs('input[data-acc="' + acc + '"][data-group="' + gid + '"][data-tier="' + (tier+1) + '"]');
+    if (next && next.value !== '') onRebateInput(next);
+  }
+
+  // ── Generate ───────────────────────────────────
+  function generate() {
+    var banner  = el('valBanner');
+    var output  = el('output');
+    var copyBtn = el('copyBtn');
+    banner.className = 'val-banner';
+    output.style.display = 'none';
+    copyBtn.style.display = 'none';
+
+    var errors = [];
+
+    // clients
+    var cinfoEls = document.querySelectorAll('[id^="cinfo-"]');
+    if (!cinfoEls.length) errors.push('Please add at least one client.');
+    var clientLines = [];
+    cinfoEls.forEach(function(inp, i) {
+      var v = inp.value.trim();
+      if (!v) errors.push('Client #' + (i+1) + ': Please fill in client info.');
+      else clientLines.push(v);
+    });
+
+    // accounts
+    var accBlocks = document.querySelectorAll('.account-block');
+    if (!accBlocks.length) errors.push('Please add at least one account group.');
+
+    var accActions = [];
+    accBlocks.forEach(function(block, bi) {
+      var id       = block.id.replace('acc-', '');
+      var plat     = (el('accPlat-'   + id) ? el('accPlat-'   + id).value : '').trim();
+      var accType  = (el('accType-'   + id) ? el('accType-'   + id).value : '').trim();
+      var qty      = parseInt(el('accQty-'    + id) ? el('accQty-'    + id).value : '0');
+      var rebate   = el('accRebate-' + id) ? el('accRebate-' + id).value : 'no';
+      var label    = 'Account #' + (bi+1);
+
+      if (!plat)   { errors.push(label + ': Please select a platform.'); }
+      if (!accType){ errors.push(label + ': Please fill in account type.'); }
+      if (!plat || !accType) return;
+      if (qty === 0 && rebate === 'no') {
+        errors.push(label + ': Please select new account qty or set rebate.'); return;
+      }
+
+      var rebateLines = [];
+
+      if (rebate === 'custom') {
+        var visCount = tierVis[id] || DEFAULT_SHOW;
+        // rule 1: tier consistency
+        for (var ti = 0; ti < visCount; ti++) {
+          var filled = GROUPS.filter(function(g) {
+            var gid = g.replace(/\s/g,'_');
+            var inp = qs('input[data-acc="'+id+'"][data-group="'+gid+'"][data-tier="'+ti+'"]');
+            return inp && inp.value !== '' && !isNaN(parseFloat(inp.value));
+          });
+          if (filled.length > 0 && filled.length < GROUPS.length) {
+            var missing = GROUPS.filter(function(g){ return filled.indexOf(g) === -1; });
+            errors.push(label + ' tier ' + ALL_TIERS[ti] + ': ' + missing.join(' / ') + ' not filled.');
+            missing.forEach(function(g) {
+              var gid = g.replace(/\s/g,'_');
+              var inp = qs('input[data-acc="'+id+'"][data-group="'+gid+'"][data-tier="'+ti+'"]');
+              if (inp) inp.classList.add('err');
+            });
+          }
+        }
+        // rule 2: lower not > upper
+        GROUPS.forEach(function(g) {
+          var gid = g.replace(/\s/g,'_');
+          for (var ti = 1; ti < visCount; ti++) {
+            var cur  = qs('input[data-acc="'+id+'"][data-group="'+gid+'"][data-tier="'+ti+'"]');
+            var prev = qs('input[data-acc="'+id+'"][data-group="'+gid+'"][data-tier="'+(ti-1)+'"]');
+            if (cur && prev && cur.value !== '' && prev.value !== '') {
+              if (parseFloat(cur.value) > parseFloat(prev.value)) {
+                errors.push(label + ' ' + g + ' ' + ALL_TIERS[ti] + '(' + cur.value + ') exceeds ' + ALL_TIERS[ti-1] + '(' + prev.value + ').');
+                cur.classList.add('err');
+              }
+            }
+          }
+        });
+        // build lines
+        GROUPS.forEach(function(g) {
+          var gid = g.replace(/\s/g,'_');
+          var parts = [];
+          for (var ti = 0; ti < visCount; ti++) {
+            var inp = qs('input[data-acc="'+id+'"][data-group="'+gid+'"][data-tier="'+ti+'"]');
+            if (inp && inp.value !== '' && !isNaN(parseFloat(inp.value))) {
+              var v = parseFloat(inp.value);
+              parts.push(ALL_TIERS[ti] + ' ' + (v % 1 === 0 ? v : v.toFixed(2)));
+            }
+          }
+          if (parts.length) rebateLines.push(accType + ' ' + g + ' ($) ' + parts.join(' | '));
+        });
+      }
+
+      accActions.push({ plat: plat, accType: accType, qty: qty, rebate: rebate, rebateLines: rebateLines });
+    });
+
+    if (errors.length) {
+      banner.className = 'val-banner fail';
+      banner.innerHTML = '❌ Please fix the following:<br>' + errors.map(function(e){ return '• ' + e; }).join('<br>');
+      return;
+    }
+
+    // build output — CN + EN
+    var forSuffix   = clientLines.length === 2 ? ' for both' : clientLines.length > 2 ? ' for all' : '';
+    var forSuffixCN = clientLines.length === 2 ? '' : clientLines.length > 2 ? '' : '';
+
+    // ── build action pairs ──
+    var stepNum = 1;
+    var cnLines = [];
+    var enLines = [];
+
+    accActions.forEach(function(a) {
+      if (a.qty > 0) {
+        var qtyStr   = a.qty > 1 ? ' (x' + a.qty + ')' : '';
+        var qtyStrCN = a.qty > 1 ? '（x' + a.qty + '）' : '';
+        var platType = a.plat + ' ' + a.accType;
+        // cn open account (not used in EN version)
+        enLines.push(stepNum + '. Open ' + platType + ' account' + qtyStr + forSuffix + '.');
+        stepNum++;
+      }
+      if (a.rebate === 'full') {
+        // cn full rebate (not used)
+        enLines.push(stepNum + '. Set full rebate' + forSuffix + '.');
+        stepNum++;
+      } else if (a.rebate === 'custom' && a.rebateLines.length) {
+        // cn custom rebate (not used)
+        // cn rebate lines (not used)
+        enLines.push(stepNum + '. Set rebate' + forSuffix + ':');
+        a.rebateLines.forEach(function(r) { enLines.push('   ' + r); });
+        stepNum++;
+      }
+    });
+
+    // ── EN only ──
+    var enBlock = [];
+    if (clientLines.length === 1) {
+      enBlock.push('Client: ' + clientLines[0]);
+    } else {
+      clientLines.forEach(function(c, i) { enBlock.push('Client ' + (i+1) + ': ' + c); });
+    }
+    enBlock.push('');
+    if (enLines.length === 1) {
+      enBlock.push('Please ' + enLines[0].replace(/^\d+\.\s*/, '').replace(/\.$/, '').toLowerCase() + '.');
+    } else {
+      enBlock.push('Please assist to:');
+      enLines.forEach(function(l) { enBlock.push(l); });
+    }
+    enBlock.push('');
+    enBlock.push('Thank you.');
+
+    var text = enBlock.join('\n');
+    output.textContent = text;
+    output.style.display = 'block';
+    copyBtn.style.display = 'inline-block';
+    banner.className = 'val-banner pass';
+    banner.innerHTML = '✓ Validated. Output generated.';
+    output.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  // ── Copy ──────────────────────────────────────
+  function copyOutput() {
+    var text = el('output').textContent;
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(showCopied).catch(function(){ fallbackCopy(text); });
+    } else {
+      fallbackCopy(text);
+    }
+  }
+  function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    try { document.execCommand('copy'); showCopied(); }
+    catch(e) { alert('Please long-press to copy manually.'); }
+    document.body.removeChild(ta);
+  }
+  function showCopied() {
+    var btn = el('copyBtn');
+    btn.textContent = '✓ Copied!';
+    setTimeout(function(){ btn.textContent = 'Copy'; }, 2000);
+  }
+
+  // ── Reset ─────────────────────────────────────
+  function resetAll() {
+    el('clientsContainer').innerHTML  = '';
+    el('accountsContainer').innerHTML = '';
+    el('valBanner').className = 'val-banner';
+    el('output').style.display = 'none';
+    el('copyBtn').style.display = 'none';
+    el('multiClientWarn').classList.remove('show');
+    clientCount = 0; accountCount = 0;
+    Object.keys(tierVis).forEach(function(k){ delete tierVis[k]; });
+    addClient(); addAccount();
+  }
+
+  // ── Init ──────────────────────────────────────
+  el('btnAddClient').addEventListener('click', addClient);
+  el('btnAddAccount').addEventListener('click', addAccount);
+  el('btnGenerate').addEventListener('click', generate);
+  el('btnReset').addEventListener('click', resetAll);
+  el('copyBtn').addEventListener('click', copyOutput);
+
+  addClient();
+  addAccount();
+
+})();
+</script>
+</body>
+</html>
